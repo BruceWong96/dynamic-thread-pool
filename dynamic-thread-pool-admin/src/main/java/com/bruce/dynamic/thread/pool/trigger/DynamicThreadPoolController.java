@@ -5,11 +5,13 @@ import com.bruce.dynamic.thread.pool.sdk.domain.model.entity.ThreadPoolConfigEnt
 import com.bruce.dynamic.thread.pool.types.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RList;
+import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -31,11 +33,12 @@ public class DynamicThreadPoolController {
     @RequestMapping(value = "query_thread_pool_list", method = RequestMethod.GET)
     public Response<List<ThreadPoolConfigEntity>> queryThreadPoolList() {
         try{
-            RList<ThreadPoolConfigEntity> cacheList = redissonClient.getList("THREAD_POOL_CONFIG_LIST_KEY");
+            RMap<String, ThreadPoolConfigEntity> cacheMap = redissonClient.getMap("THREAD_POOL_CONFIG_HASH_KEY");
+            List<ThreadPoolConfigEntity> cacheList = new ArrayList<>(cacheMap.values());
             return Response.<List<ThreadPoolConfigEntity>>builder()
                     .code(Response.Code.SUCCESS.getCode())
                     .info(Response.Code.SUCCESS.getInfo())
-                    .data(cacheList.readAll())
+                    .data(cacheList)
                     .build();
         } catch (Exception e) {
             log.error("查询线程池数据异常", e);
@@ -93,6 +96,7 @@ public class DynamicThreadPoolController {
         try{
             log.info("修改线程池配置开始 {} {} {}", request.getAppName(), request.getThreadPoolName(), JSON.toJSONString(request));
             RTopic topic = redissonClient.getTopic("DYNAMIC_THREAD_POOL_REDIS_TOPIC" + "_" + request.getAppName());
+            log.error("topic name {}", topic.getChannelNames());
             topic.publish(request);
             log.info("修改线程池配置完成 {} {}", request.getAppName(), request.getThreadPoolName());
             return Response.<Boolean>builder()

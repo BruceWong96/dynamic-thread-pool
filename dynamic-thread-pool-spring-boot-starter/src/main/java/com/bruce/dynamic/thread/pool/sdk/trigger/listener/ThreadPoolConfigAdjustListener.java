@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 动态线程池变更监听
@@ -35,7 +36,7 @@ public class ThreadPoolConfigAdjustListener implements MessageListener<ThreadPoo
         dynamicThreadPoolService.updateThreadPoolConfig(threadPoolConfigEntity);
 
         // 更新后上报最新的数据
-        List<ThreadPoolConfigEntity> threadPoolConfigEntities = dynamicThreadPoolService.queryThreadPoolList();
+        Map<String, ThreadPoolConfigEntity> threadPoolConfigEntities = dynamicThreadPoolService.queryThreadPoolList();
         registry.reportThreadPool(threadPoolConfigEntities);
 
         ThreadPoolConfigEntity threadPoolConfigEntityCurrent = dynamicThreadPoolService.queryThreadPoolConfigByName(threadPoolConfigEntity.getThreadPoolName());

@@ -5,10 +5,12 @@ import com.bruce.dynamic.thread.pool.sdk.domain.model.valobj.RegistryEnumVO;
 import com.bruce.dynamic.thread.pool.sdk.registry.IRegistry;
 import org.redisson.api.RBucket;
 import org.redisson.api.RList;
+import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 /**
  * redis 注册中心
@@ -22,9 +24,9 @@ public class RedisRegistry implements IRegistry {
     }
 
     @Override
-    public void reportThreadPool(List<ThreadPoolConfigEntity> threadPoolEntities) {
-        RList<ThreadPoolConfigEntity> list = redissonClient.getList(RegistryEnumVO.THREAD_POOL_CONFIG_LIST_KEY.getKey());
-        list.addAll(threadPoolEntities);
+    public void reportThreadPool(Map<String, ThreadPoolConfigEntity> threadPoolEntities) {
+        RMap<String, ThreadPoolConfigEntity> map = redissonClient.getMap(RegistryEnumVO.THREAD_POOL_CONFIG_HASH_KEY.getKey());
+        map.putAll(threadPoolEntities);
     }
 
     @Override

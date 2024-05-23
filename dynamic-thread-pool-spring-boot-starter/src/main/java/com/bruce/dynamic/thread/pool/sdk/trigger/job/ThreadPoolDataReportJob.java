@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 线程池数据上报任务
@@ -28,14 +29,18 @@ public class ThreadPoolDataReportJob {
 
     @Scheduled(cron = "0/20 * * * * ?")
     public void execReportThreadPoolList() {
-        List<ThreadPoolConfigEntity> threadPoolConfigEntities = dynamicThreadPoolService.queryThreadPoolList();
+        Map<String, ThreadPoolConfigEntity> threadPoolConfigEntities = dynamicThreadPoolService.queryThreadPoolList();
         registry.reportThreadPool(threadPoolConfigEntities);
         logger.info("动态线程池，上报线程池信息: {}", JSON.toJSONString(threadPoolConfigEntities));
 
-        for (ThreadPoolConfigEntity threadPoolConfigEntity : threadPoolConfigEntities) {
+        /**
+         * 遍历 map 并上报详细信息
+         */
+        threadPoolConfigEntities.forEach((threadPoolName, threadPoolConfigEntity) -> {
             registry.reportThreadPoolConfigParameter(threadPoolConfigEntity);
             logger.info("动态线程池，上报线程池参数: {}", JSON.toJSONString(threadPoolConfigEntity));
-        }
+        });
+
     }
 
 

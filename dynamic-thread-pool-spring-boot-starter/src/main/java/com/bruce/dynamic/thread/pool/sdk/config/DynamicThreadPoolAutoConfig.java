@@ -1,6 +1,5 @@
 package com.bruce.dynamic.thread.pool.sdk.config;
 
-import com.alibaba.fastjson.JSON;
 import com.bruce.dynamic.thread.pool.sdk.domain.DynamicThreadPoolService;
 import com.bruce.dynamic.thread.pool.sdk.domain.IDynamicThreadPoolService;
 import com.bruce.dynamic.thread.pool.sdk.domain.model.entity.ThreadPoolConfigEntity;
@@ -71,7 +70,7 @@ public class DynamicThreadPoolAutoConfig {
 
     @Bean("dynamicThreadPoolService")
     public DynamicThreadPoolService dynamicThreadPoolService(ApplicationContext applicationContext, Map<String, ThreadPoolExecutor> threadPoolExecutorMap, RedissonClient redissonClient) {
-        String applicationName = applicationContext.getEnvironment().getProperty("spring.application.name");
+        applicationName = applicationContext.getEnvironment().getProperty("spring.application.name");
         if (StringUtils.isBlank(applicationName)) {
             applicationName = "缺省的";
             logger.warn("动态线程池，启动提示。SpringBoot 应用未配置 spring.application.name 无法获取到应用名称! ");
