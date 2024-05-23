@@ -5,10 +5,7 @@ import com.bruce.dynamic.thread.pool.sdk.domain.model.entity.ThreadPoolConfigEnt
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -21,15 +18,22 @@ public class DynamicThreadPoolService implements IDynamicThreadPoolService{
     private final String applicationName;
     private final Map<String, ThreadPoolExecutor> threadPoolExecutorMap;
 
+    /**
+     * 这里的 threadPoolExecutorMap 是 Spring 容器自动注入的
+     * 这也是采集线程池信息的入口
+     * @param applicationName
+     * @param threadPoolExecutorMap
+     */
     public DynamicThreadPoolService(String applicationName, Map<String, ThreadPoolExecutor> threadPoolExecutorMap) {
         this.applicationName = applicationName;
         this.threadPoolExecutorMap = threadPoolExecutorMap;
     }
 
     @Override
-    public List<ThreadPoolConfigEntity> queryThreadPoolList() {
+    public Map<String, ThreadPoolConfigEntity> queryThreadPoolList() {
         Set<String> threadPoolBeanNames = threadPoolExecutorMap.keySet();
-        List<ThreadPoolConfigEntity> threadPoolVOs = new ArrayList<>(threadPoolBeanNames.size());
+//        List<ThreadPoolConfigEntity> threadPoolVOs = new ArrayList<>(threadPoolBeanNames.size());
+        Map<String, ThreadPoolConfigEntity> threadPoolVOs = new HashMap<>();
 
         for (String beanName : threadPoolBeanNames) {
             ThreadPoolExecutor threadPoolExecutor = threadPoolExecutorMap.get(beanName);
@@ -41,7 +45,7 @@ public class DynamicThreadPoolService implements IDynamicThreadPoolService{
             threadPoolConfigVO.setQueueType(threadPoolExecutor.getQueue().getClass().getSimpleName());
             threadPoolConfigVO.setQueueSize(threadPoolExecutor.getQueue().size());
             threadPoolConfigVO.setRemainingCapacity(threadPoolExecutor.getQueue().remainingCapacity());
-            threadPoolVOs.add(threadPoolConfigVO);
+            threadPoolVOs.put(beanName, threadPoolConfigVO);
         }
 
         return threadPoolVOs;
